@@ -1,15 +1,11 @@
 const conn = require("../model/conn")
 const UserService = {
-    addUser: ({ user_login_password, user_telphone }, callback) => {
+    addUser: ({ user_login_password, user_telphone,user_nickname='无名',user_loacation='暂无收货地址' }, callback) => {
         let user_id = new Date().getTime() + Math.random().toString(36).substring(2);
         let user_registration_time = new Date();
-        let user_image = `/images/userImg/default.png`
-        console.log(user_login_password, user_telphone, user_id);
-
-        console.log(user_id, user_image, user_telphone, user_login_password, user_registration_time)
-
-        let sql_insert = `INSERT INTO user (user_id,user_image,user_telphone,user_login_password,user_registration_time) VALUES(?,?,?,?,?)`;
-        let sql_insertParams = [user_id, user_image, user_telphone, user_login_password, user_registration_time];
+        let user_image = `/node//images/userImg/default.png`
+        let sql_insert = `INSERT INTO user (user_id,user_image,user_telphone,user_login_password,user_registration_time,user_nickname,user_loacation) VALUES(?,?,?,?,?,?,?)`;
+        let sql_insertParams = [user_id, user_image, user_telphone, user_login_password, user_registration_time,user_nickname,user_loacation];
         let sql_look_tele = `SELECT * FROM USER WHERE user_telphone = ?`
         // let look_teleParams = [user_telphone]; 
 

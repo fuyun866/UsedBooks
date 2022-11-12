@@ -1,0 +1,7 @@
+// {
+//     "terminal.integrated.shell.windows": "D:\\IT SoftWare\\cmder\\Cmder.exe",
+//     "terminal.integrated.shellArgs.windows": [
+//         "/k %CMDER_ROOT%\\vendor\\init.bat"
+//     ]
+
+// }

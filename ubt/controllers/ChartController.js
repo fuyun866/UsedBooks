@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const multer = require("multer")
-const { upload, handerchartInfo, handerGetChartInfo } = require("../services/ChartService")
+const { upload, handerchartInfo, handerGetChartInfo,handerGetChartInfoNew,handerRemoveMsgRead } = require("../services/ChartService")
 
 const chartController = {
     uploadChartImg: async (req, res) => {
@@ -26,6 +26,19 @@ const chartController = {
         handerGetChartInfo(req.body, function (result) {
             res.send(result)
         })
+    },
+    getChartInfoNew: async (req, res) => {
+        handerGetChartInfoNew(function (result) {
+            res.send(result)
+        })
+    },
+    removeMsgRead: async (req, res) => {
+        handerRemoveMsgRead(req.body,function (result) {
+            res.send(result)
+        })
+    },
+    // 聊天测试路由
+    testChart:async(req,res)=>{
     }
 }
 

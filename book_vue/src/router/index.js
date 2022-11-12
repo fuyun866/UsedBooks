@@ -15,6 +15,8 @@ import BookDetails from "../components/BookDetails"
 import Chart from "../components/Chart"
 import Order from "../components/Order"
 import MyOrder from "../components/accounts/MyOrder"
+import ChartTest from "../components/ChartTest"
+import Collection from "../components/Collection"
 
 
 
@@ -46,10 +48,24 @@ const routes = [
         }
       },
       {
+        path: "/ChartTest",
+        name: "ChartTest",
+        components: {
+          container: ChartTest
+        }
+      },
+      {
         path: "/MyOrder",
         name: "MyOrder",
         components: {
           container: MyOrder
+        }
+      },
+      {
+        path: "/Collection",
+        name: "Collection",
+        components: {
+          container: Collection
         }
       },
       {

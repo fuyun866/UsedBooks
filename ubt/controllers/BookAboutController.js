@@ -32,10 +32,24 @@ const BookAboutController = {
         });
 
     },
+    updateBook_collection: async (req, res) => {
+        // console.log(req.body, req.params.id)
+        await BookAboutService.updateBook_collection(req.body,  (result) => {
+            res.send(result)
+        });
+
+    },
 
     updateBook_price: async (req, res) => {
         // console.log(req.body, req.params.id)
         await BookAboutService.updateBook_price(req.body, req.params.id, (result) => {
+            res.send(result)
+        });
+
+    },
+    deleteCollectionAll: async (req, res) => {
+        // console.log(req.body, req.params.id)
+        await BookAboutService.deleteCollectionAll((result) => {
             res.send(result)
         });
 
@@ -55,6 +69,12 @@ const BookAboutController = {
             res.json(results)
         })
     },
+    getCollections: async (req, res) => {
+        await BookAboutService.getCollections((results) => {
+            // 以json的形式返回
+            res.json(results)
+        })
+    },
 
     getBooknum: async (req, res) => {
         await BookAboutService.getBooknum(null, (results) => {
@@ -64,10 +84,8 @@ const BookAboutController = {
     },
 
     getLinkbook: async (req, res) => {
-        // console.log(req.query)
         await BookAboutService.getLinkbook(req.query, (results) => {
             // 以json的形式返回
-            console.log(results.length)
             res.json({ results })
         })
     },

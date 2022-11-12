@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require("cors")
 const session = require("express-session")
+var http = require('http').Server(app);
 
 
 var indexRouter = require('./routes/index');
@@ -19,7 +20,22 @@ var sellerorderRouter = require('./routes/sellerorder');
 var recordRouter = require('./routes/record');
 var recordChart = require('./routes/recordChart');
 
+
+
 var app = express();
+var io = require('socket.io')(http);
+
+io.on('connection',function(socket) {
+  //接收数据
+  socket.on('login', function (obj) {                
+      console.log(obj.username);
+      // 发送数据
+      socket.emit('relogin', {
+        msg: `你好${obj.username}`,
+        code: 200
+      });  
+  });
+});
 
 //配置session
 app.use(session({
@@ -35,7 +51,7 @@ app.use(session({
 
 //配置跨域
 app.use(cors({
-  origin:"http://localhost:3000",
+  origin:["http://localhost:8080","http://localhost:3000"],
   credentials:true
 }))
 

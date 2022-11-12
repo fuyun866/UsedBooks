@@ -44,6 +44,7 @@
 
 <script>
 export default {
+  name:"BookShow",
   data() {
     return {
       select: "",
@@ -126,24 +127,22 @@ export default {
       ],
       book_list: [],
       LazyLoding: true,
-      total:0
+      total:0,
+      classify:"全部"
     };
   },
   computed: {},
   methods: {
     // 点击其他分类样式变化
     handerClass(index) {
+      this.book_list = [];
       for (let i = 0; i < this.list.length; i++) {
         this.list[i].class = "classify_item";
       }
       this.list[index].class = "classify_item active";
       let classify = this.list[index].label;
-      if (classify == "全部") this.book_list = this.book_list_copy;
-      else {
-        this.book_list = this.book_list_copy.filter((item) => {
-          return item.bookA_kind == classify;
-        });
-      }
+      this.classify = classify;
+      this.getBooks()
     },
     // 点击搜索图书
     handerSelect() {
@@ -177,15 +176,19 @@ export default {
         params: {
           onset: this.book_list.length,
           offset: 9,
+          classify:this.classify
         },
       });
-      this.book_list = [...this.book_list, ...data.results];
+      this.book_list = [...this.book_list, ...data.results.books];
       this.LazyLoding = true;
+      if(this.classify == '全部') return;
+      this.total = data.results.count;
     },
   },
 
   // 初始化获取所有图书信息
   async mounted() {
+    // 获取图书的全部数量
     let {data} = await this.$axios.get("/node/bookabout/allnum");
     this.total = data.results[0].total;
     this.getBooks();

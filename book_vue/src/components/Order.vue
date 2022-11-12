@@ -116,12 +116,10 @@ export default {
   },
   computed: {},
   mounted() {
-    this.book_detail = this.$route.query.book_detail;
-    // console.log(this.book_detail);
+    this.book_detail = JSON.parse(this.$route.query.book_detail);
   },
 };
 </script>
-
 <style lang="less" scoped>
 .order {
   width: 100%;

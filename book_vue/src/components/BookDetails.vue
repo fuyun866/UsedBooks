@@ -11,7 +11,10 @@
         <!-- <p>书籍状态:{{}}</p> -->
         <div class="buyCar">
           <button class="join_btn" @click="handerPlOrder()">购买</button>
-          <!-- <div class="love"><img src="@/assets/imgs/love.png" alt=""></div> -->
+          <div class="love" @click="handerCollection">
+            <img v-if="!collection" src="@/assets/imgs/love_light.png" alt="">
+            <img v-else src="@/assets/imgs/love_dark.png" alt="">
+          </div>
         </div>
       </div>
     </div>
@@ -51,28 +54,45 @@
 </template>
 
 <script>
+import merge from "webpack-merge"
 export default {
+  name:"BookDetails",
   data() {
     return {
       book_detail: {},
+      collection:false
     };
   },
   methods: {
+    // 路由跳转
     handerPlOrder() {
+      if (!localStorage.getItem("token")) return this.$message.error("请登录...")
       this.$router.push({
         path: "/Order",
         query: {
-          book_detail: this.book_detail,
+          book_detail:JSON.stringify(this.book_detail),
         },
       });
     },
+    // 收藏/取消收藏
+    async handerCollection(){
+      this.collection = !this.collection;
+      let {data} = await this.$axios.post("/node/bookabout/collection",{
+        bookA_collection:Number(this.collection),
+        bookA_id:this.book_detail.bookA_id
+      })
+      this.$router.push({
+        query:merge(this.$route.query,{'bookA_collection':this.collection})
+      })
+      if(data.code && this.collection) this.$message.success("收藏成功")
+      if(!data.code) this.$message.error("操作失败")
+    }
   },
   async mounted() {
     this.$store.dispatch("changehomebol", false);
-    // console.log(this.$route);
     this.book_detail = this.$route.query;
-    // console.log(this.book_detail);
-    
+    console.log( this.$route.query);
+    this.collection = this.book_detail.bookA_collection == 1?true:false;
   },
   beforeRouteLeave(from, to, next) {
     this.$store.dispatch("changehomebol", true);

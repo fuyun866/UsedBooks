@@ -6,7 +6,6 @@ const LoginService = {
         // 获取请求头中的信息
         const beareHeader = req.headers.authorization;
         verToken.getToken(beareHeader).then((data) => {
-            console.log(data);
             callback({ code: 1, value: "免登录测试", info: data });
         }).catch((err) => {
             callback({ code: 0, value: "请登录------" })

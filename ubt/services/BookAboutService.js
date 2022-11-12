@@ -53,17 +53,39 @@ const BookAboutService = {
             if (err1) {
                 throw err1
             }
-            // console.log(result1);
             if (!result1.length) callback({ code: 0, value: "该书籍不存在！" })
             else {
                 conn.query(sql_update, sql_updateParams, (err2, results2) => {
                     if (err2) {
                         throw err2
                     }
-                    // console.log(results2, "444");
                     if (err2) callback({ code: 0, value: "更新失败！" })
                     else callback({ code: 1, value: "更新成功" })
                 })
+            }
+        })
+    },
+    updateBook_collection: ({ bookA_collection , bookA_id},callback) => {
+        let sql_update = `UPDATE bookabout set bookA_collection=? where bookA_id=?`;
+        let sql_updateParams = [bookA_collection, bookA_id];
+        conn.query(sql_update, sql_updateParams, (err1, result1) => {
+            if (err1) {
+                callback({ code: 0, value: "收藏失败！" })
+            }
+            else {
+                callback({ code: 1, value: "收藏成功！",data:result1 })
+            }
+        })
+    },
+
+    deleteCollectionAll: (callback) => {
+        let sql_update = `UPDATE bookabout set bookA_collection=0`;
+        conn.query(sql_update, (err1, result1) => {
+            if (err1) {
+                callback({ code: 0, value: "操作失败！" })
+            }
+            else {
+                callback({ code: 1, value: "收藏夹已清空",data:result1 })
             }
         })
     },
@@ -117,8 +139,22 @@ const BookAboutService = {
             //将查询出来的数据返回给回调函数
             callback &&
                 callback(
-                    {code:1,value:"书籍获取成功",data:results}
+                    { code: 1, value: "书籍获取成功", data: results }
                 )
+        })
+    },
+
+    // 获取收藏夹书籍
+    getCollections: (callback) => {
+        let sql_find = `select * from bookabout a LEFT OUTER JOIN books s  on a.bookA_isbn = s.book_isbn  WHERE bookA_collection=1`;
+        conn.query(sql_find, function (err, results) {
+            if (err) {
+                throw err
+            }
+            else{
+                callback({code:1,value:"书籍获取成功",data:results})
+            }
+
         })
     },
 
@@ -147,12 +183,13 @@ const BookAboutService = {
             //将查询出来的数据返回给回调函数
             callback &&
                 callback(
-                    {code:1,value:"查询成功",data:results}
+                    { code: 1, value: "查询成功", data: results }
                 )
         })
     },
 
     getBook_standlink: ({ bookA_stand, bookA_state }, callback) => {
+        console.log(bookA_stand, bookA_state);
         let sql_find = `select * from bookabout a LEFT OUTER JOIN books s ON a.bookA_isbn=s.book_isbn where bookA_stand=? and bookA_state=?`;
         let sql_findParams = [bookA_stand, bookA_state];
         conn.query(sql_find, sql_findParams, function (err, results, fields) {
@@ -162,24 +199,36 @@ const BookAboutService = {
             //将查询出来的数据返回给回调函数
             callback &&
                 callback(
-                    {code:1,value:"查询成功",data:results}
+                    { code: 1, value: "查询成功", data: results }
                 )
         })
     },
 
-    getLinkbook: ({ onset, offset }, callback) => {
-        console.log(onset, offset);
-        let sql_find = `select * from bookabout a LEFT OUTER JOIN books s  ON a.bookA_isbn=s.book_isbn limit ?,?`;
+    getLinkbook: ({ onset, offset, classify }, callback) => {
+        console.log(onset, offset, classify,'查询书籍');
+        let sql_find;
+        if (classify !== '全部') sql_find = `select * from bookabout a LEFT OUTER JOIN books s  ON a.bookA_isbn=s.book_isbn WHERE bookA_kind = '${classify}' limit ?,?`;
+        else sql_find = `select * from bookabout a LEFT OUTER JOIN books s  ON a.bookA_isbn=s.book_isbn limit ?,?`;
+
+        let sql_count = `SELECT COUNT(bookA_kind = '${classify}' or null) as classify from bookabout`;
         let sql_findParams = [parseInt(onset), parseInt(offset)];
         conn.query(sql_find, sql_findParams, function (err, results) {
             if (err) {
                 throw err
             }
-            //将查询出来的数据返回给回调函数
-            callback &&
-                callback(
-                    results ? JSON.parse(JSON.stringify(results)) : null
-                )
+            else {
+                conn.query(sql_count, (err1, result1) => {
+                    //将查询出来的数据返回给回调函数
+                    let totalResult = {
+                        books:results,
+                        count:result1[0].classify
+                    }
+                    callback &&
+                        callback(
+                            results ? JSON.parse(JSON.stringify(totalResult)) : null
+                        )
+                })
+            }
         })
     },
 
@@ -212,6 +261,7 @@ const BookAboutService = {
     },
 
     getBook_kind: (bookA_kind, callback) => {
+
         let sql_find = `select * from bookabout where bookA_kind=?`;
         conn.query(sql_find, bookA_kind, function (err, results, fields) {
             if (err) {

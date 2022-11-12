@@ -23,7 +23,6 @@ const setToken = function (user_id) {
 const getToken = function (token) {
     return new Promise((resolve, reject) => {
         if (!token) {
-            console.log('token是空的')
             reject({
                 code:0,
                 value:"token是空的"

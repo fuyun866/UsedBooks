@@ -12,5 +12,6 @@ router.post("/avoidLogin",LoginController.avoidLogin)
 router.post("/getWeather",LoginController.getWeather)
 // 设置管理员免登录
 router.post("/avoidAdminLogin",LoginController.avoidAdminLogin)
+router.post("/exitLogin",LoginController.exitLogin)
 
 module.exports = router

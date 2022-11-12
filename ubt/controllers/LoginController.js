@@ -2,7 +2,6 @@ const LoginService = require("../services/LoginService")
 const UserService = require("../services/UserService")
 const AdminService = require("../services/AdminService")
 const verToken = require("../token/token")
-const express = require("express")
 const LoginController = {
     userLogin: async (req, res) => {
         // console.log(req.body)
@@ -41,9 +40,13 @@ const LoginController = {
             res.send({code:0,value:"请登录",data:{}})
         }
     },
+    // 后台管理系统退出登录
+    exitLogin:(req,res)=>{
+        req.session.user = "";
+        res.send({code:0,value:"退出登录",data:{}})
+    },
 
     avoidLogin: async (req, res) => {
-        console.log(req)
         await LoginService.avoidLogin(req, (result) => {
             res.send(result)
         });

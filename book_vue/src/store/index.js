@@ -9,8 +9,8 @@ export default new Vuex.Store({
     homeBol:true,
     userInfo:{
       user_id: "",
-      user_nickname: "",
-      user_image: "",
+      user_nickname: "无名",
+      user_image: "http://localhost:4000/images/userImg/default.png",
       user_telphone: "",
       user_loacation: "",
       user_name: "",

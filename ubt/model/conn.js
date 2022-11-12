@@ -5,7 +5,8 @@ var conn = mysql.createConnection({
     port: 3306,
     user: 'root',
     password: 'MYSQL',
-    database: 'newbooks'
+    database: 'newbooks',
+    timezone:"08:00"
 });
 
 conn.connect(err => {

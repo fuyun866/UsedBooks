@@ -236,7 +236,6 @@ export default {
           bookA_kind: this.value,
         })
         .then((res) => {
-          console.log(res);
           this.book_show = false;
           this.$message.success("书籍发布成功");
           this.isbn = "";
@@ -268,9 +267,6 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-      // this.book_show = false;
-      // this.$message.success("书籍发布成功");
-      // this.isbn = "";
     },
   },
 
@@ -285,11 +281,9 @@ export default {
   beforeRouteEnter(from, to, next) {
     if (!localStorage.getItem("token")) {
       next((vm) => {
-        console.log(vm);
         vm.$router.push({ path: "/" });
       });
     } else {
-      console.log("进入");
       next(true);
     }
   },

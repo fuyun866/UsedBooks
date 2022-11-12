@@ -6,7 +6,7 @@
         <div class="avatar" :style="styleVar"></div>
         <div class="info">
           <p>账户昵称:</p>
-          <p class="name">{{ $store.state.userInfo.user_nickname }}</p>
+          <p class="name" ref="name">{{ $store.state.userInfo.user_nickname }}</p>
         </div>
       </div>
       <div class="address">
@@ -38,14 +38,14 @@
             :disabled="inputBol"
           ></el-input>
         </el-form-item>
-        <el-form-item label="QQ号:" prop="qq">
+        <!-- <el-form-item label="QQ号:" prop="qq">
           <el-input
             type="text"
             v-model="ruleForm.qq"
             autocomplete="off"
             :disabled="inputBol"
           ></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="收货地址:" prop="address">
           <el-input
             type="text"
@@ -148,6 +148,7 @@ export default {
     userInfo: {
       deep: true,
       handler(newValue, oldvalue) {
+        console.log(newValue, oldvalue);
         let info = {
           name: newValue.user_nickname,
           qq: newValue.qqaccount,
@@ -169,14 +170,13 @@ export default {
       const isJPG = file.type === ("image/webp" || "image/jpeg/");
       console.log(isJPG);
       const isLt2M = file.size / 1024 / 1024 < 2;
-
-      if (!isJPG) {
-        this.$message.error("上传头像图片只能是 WEBP 格式!");
-      }
-      if (!isLt2M) {
-        this.$message.error("上传头像图片大小不能超过 2MB!");
-      }
-      return isJPG && isLt2M;
+      // if (!isJPG) {
+      //   this.$message.error("上传头像图片只能是 WEBP 格式!");
+      // }
+      // if (!isLt2M) {
+      //   this.$message.error("上传头像图片大小不能超过 2MB!");
+      // }
+      return true;
     },
     // 处理用户修改资料
     submitForm(formName) {
@@ -189,8 +189,11 @@ export default {
             user_image: this.imageUrl,
             user_id: this.$store.state.userInfo.user_id,
           });
-          console.log(data);
+          this.$refs.name.innerHTML = this.ruleForm.name;
           this.inputBol = true;
+          let userData = this.$store.state.userInfo;
+          userData.user_image = this.imageUrl;
+          this.$store.dispatch("changeuserinfo",userData)
           this.nowImg = this.imageUrl;
         } else {
           console.log("error submit!!");
@@ -199,8 +202,18 @@ export default {
       });
     },
   },
-  created() {
-    
+  mounted() {
+    let userInfo = this.$store.state.userInfo;
+    if (userInfo.user_loacation) {
+      let info = {
+        name: userInfo.user_nickname,
+        qq: userInfo.qqaccount,
+        address: userInfo.user_loacation,
+      };
+      let ruleForm = JSON.parse(JSON.stringify(info));
+      this.ruleForm = ruleForm;
+      this.imageUrl = userInfo.user_image;
+    }
   },
 };
 </script>

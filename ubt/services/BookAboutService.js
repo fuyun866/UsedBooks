@@ -17,6 +17,25 @@ const BookAboutService = {
             else callback({ code: 1, value: "插入成功" })
         })
     },
+    getBook_idTrue: (bookA_id, callback) => {
+        console.log(bookA_id,'666');
+        let sql_find = `select * from bookabout a LEFT OUTER JOIN books s  ON a.bookA_isbn=s.book_isbn where bookA_id=?`;
+
+        try {
+            conn.query(sql_find, bookA_id, function (err, results, fields) {
+                if (err) {
+                    throw err
+                }
+                //将查询出来的数据返回给回调函数
+                callback &&
+                    callback(
+                        results ? JSON.parse(JSON.stringify(results)) : null
+                    )
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    },
 
     updateBook_kind: ({ bookA_kind }, bookA_id, callback) => {
         console.log(bookA_id + "====" + bookA_kind);

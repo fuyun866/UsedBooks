@@ -13,6 +13,8 @@ router.put("/state/:id", BookAboutController.updateBook_state)
 router.post("/collection", BookAboutController.updateBook_collection)
 //更新价格
 router.put("/price/:id", BookAboutController.updateBook_price)
+//根据id查询可以展示到页面的书籍
+router.get("/idTrue/:id", BookAboutController.getBook_idTrue)
 // 清空收藏夹
 router.get("/deleteCollectionAll", BookAboutController.deleteCollectionAll)
 //删除

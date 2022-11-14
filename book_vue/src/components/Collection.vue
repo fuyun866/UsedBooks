@@ -5,21 +5,13 @@
         <h3>
           收藏夹 <span>全部（{{ tableData.length }}）</span>
         </h3>
-        <div class="title_right">
-          <span>已选商品</span>
-          <span class="money">{{ price }}</span>
-          <button :class="payBol ? 'pay active' : 'pay'">结算</button>
-        </div>
       </div>
       <el-table
         ref="multipleTable"
-        @select="select"
-        @select-all="selectAll"
         :data="tableData"
         tooltip-effect="dark"
         style="width: 100%"
       >
-        <el-table-column type="selection" width="55"> </el-table-column>
         <el-table-column label="书籍名称" width="120">
           <template slot-scope="scope">
             <p style="verticalalign: middle">{{ scope.row.book_name }}</p>
@@ -27,7 +19,11 @@
         </el-table-column>
         <el-table-column label="书籍图片" width="120">
           <template slot-scope="scope">
-            <img style="width: 60px" :src="scope.row.book_cover" alt="" />
+            <img
+              style="width: 60px; height: 90px"
+              :src="scope.row.book_cover"
+              alt=""
+            />
           </template>
         </el-table-column>
         <el-table-column prop="name" label="单价" width="120">
@@ -46,12 +42,20 @@
             >
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="单价" width="120">
-          <template slot="header">
+
+        <el-table-column label="详情" show-overflow-tooltip>
+          <template slot-scope="scope">
             <el-button
               size="mini"
-              type="danger"
-              @click="handleDeleteAll()"
+              type="primary"
+              @click="handleDetail(scope.$index, scope.row)"
+              >跳转</el-button
+            >
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="单价" width="120">
+          <template slot="header">
+            <el-button size="mini" type="danger" @click="handleDeleteAll()"
               >清空收藏夹</el-button
             >
           </template>
@@ -68,66 +72,109 @@ export default {
       tableData: [],
       payBol: false,
       price: "0.00",
+      isLogin:false
     };
+  },
+  computed: {
+    // 用户id
+    userId() {
+      return this.$store.state.userInfo.user_id;
+    },
+  },
+  watch: {
+    // 监听用户id
+    userId: {
+      handler(newValue, oldValue) {
+        // 获取到用户id后发送请求获取聊天数据
+        if (!this.isLogin) {
+          this.getCollections(this.$store.state.userInfo.user_id);
+        }
+      },
+    },
   },
 
   methods: {
     // 将书籍从收藏夹删除
     async handleDelete(index, row) {
-      this.tableData.splice(index, 1);
-      let { data } = await this.$axios.post("/node/bookabout/collection", {
-        bookA_collection: 0,
-        bookA_id: row.bookA_id,
-      });
-      if (data.code) this.$message.success("从收藏夹移出");
-      if (!data.code) this.$message.error("操作失败");
-    },
-    // 点击当前书籍
-    select(selection, row) {
-      row.bol = !row.bol;
-      this.payBol = selection.length == 0 ? false : true;
-      if (!row.bol)
-        this.price = (parseInt(this.price) - parseInt(row.bookA_price)).toFixed(
-          2
-        );
-      else
-        this.price = (parseInt(this.price) + parseInt(row.bookA_price)).toFixed(
-          2
-        );
-    },
-    // 清空收藏夹
-    async handleDeleteAll(){
-        this.tableData = [];
-        let {data} =await this.$axios.get("/node/bookabout/deleteCollectionAll");
-        if(data.code) return this.$message.success(data.value);
-        this.$message.erroe(data.value)
-        
-    },
-    // 全部选择/全部取消 全部书籍
-    selectAll(selection) {
-      this.price = "0.00";
-      this.payBol = selection.length == 0 ? false : true;
-      if (selection.length !== 0) {
-        selection.forEach((item) => {
-          this.price = (
-            parseInt(this.price) + parseInt(item.bookA_price)
-          ).toFixed(2);
-        });
+      // console.log(row, index);
+      let _id = row.bookA_id;
+      let { data } = await this.$axios.get(
+        "node/user/getCollections/" + this.$store.state.userInfo.user_id
+      );
+      // console.log(data);
+      let collectionValue = data[0].user_collection;
+      let collectArr = collectionValue.split(" ");
+      if (collectArr.length > 1) {
+        collectArr.pop();
       }
-    },
-    // 获取收藏的书籍数据
-    async getCollections(count = 0) {
-      let { data } = await this.$axios.get("/node/bookabout/getCollections");
-      let newData = data.data.map((item) => {
-        item.book_cover = "http://localhost:4000" + item.book_cover;
-        item = { ...item, bol: false };
-        return item;
+      let tag = collectArr.indexOf(row.bookA_id);
+      if (tag > -1) {
+        collectArr.splice(tag, 1);
+      }
+      if (collectArr.length > 0) {
+        let valueC = collectArr.join(" ");
+        collectionValue = valueC.concat(" ");
+      } else {
+        collectionValue = null;
+      }
+      this.tableData.splice(index, 1);
+      let { data: res } = await this.$axios.post("/node/user/collect", {
+        user_collection: collectionValue,
+        user_id: this.$store.state.userInfo.user_id,
       });
-      this.tableData = newData;
+      if (res.code) this.$message.success("从收藏夹移出");
+      if (!res.code) this.$message.error("操作失败");
+    },
+
+    async handleDetail(index, row) {
+      // console.log(row, index);
+      this.$router.push({ path: "/bookdetails", query: row });
+    },
+
+    // 清空收藏夹
+    async handleDeleteAll() {
+      this.tableData = [];
+      let { data } = await this.$axios.get(
+        "node/user/deleteCollectionAll/" + this.$store.state.userInfo.user_id
+      );
+      if (data.code) return this.$message.success(data.value);
+      this.$message.erroe(data.value);
+    },
+
+    // 获取收藏的书籍数据
+    async getCollections(_id) {
+      let { data } = await this.$axios.get("node/user/getCollections/" + _id);
+      console.log(data);
+      let collectionValue = data[0].user_collection;
+      if (collectionValue == null) {
+        this.tableData = [];
+      } else {
+        let collectArr = collectionValue.split(" ");
+        collectArr.pop();
+        console.log(collectArr);
+        let newData = [];
+        for (let i = 0; i < collectArr.length; i++) {
+          let { data: item } = await this.$axios.get(
+            "node/bookabout/idTrue/" + collectArr[i]
+          );
+          console.log(item);
+          if (item.results.length != 0) {
+            item = item.results[0];
+            item.book_cover = 'node'+item.book_cover;
+            item = { ...item, bol: false };
+            // console.log(item);
+            newData.push(item);
+            // console.log(newData);
+          }
+        }
+        this.tableData = newData;
+      }
     },
   },
   async mounted() {
-    this.getCollections();
+    if(!this.$store.state.userInfo.user_id) return;
+    this.getCollections(this.$store.state.userInfo.user_id);
+    this.isLogin = true;
   },
 };
 </script>

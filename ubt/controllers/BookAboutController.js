@@ -16,6 +16,12 @@ const BookAboutController = {
             res.send(result)
         });
     },
+    getBook_idTrue: async (req, res) => {
+        await BookAboutService.getBook_idTrue(req.params.id, (results) => {
+            // 以json的形式返回
+            res.json({ results })
+        })
+    },
 
     updateBook_kind: async (req, res) => {
         // console.log(req.body, req.params.id)

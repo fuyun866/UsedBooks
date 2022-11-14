@@ -94,7 +94,27 @@ const UserController = {
         await UserService.updateInfo(user_nickname, user_loacation, user_image, user_id, (result) => {
             res.send(result)
         });
-    }
+    },
+    changeCollect: async (req, res) => {
+        console.log(req.body)
+        await UserService.changeCollect(req.body, (result) => {
+            res.send(result)
+        });
+    },
+
+    getCollections: async (req, res) => {
+        console.log(req.params.id)
+        await UserService.getCollections(req.params.id, (result) => {
+            res.send(result)
+        });
+    },
+
+    deleteCollectionAll: async (req, res) => {
+        console.log(req.params.id)
+        await UserService.deleteCollectionAll(req.params.id, (result) => {
+            res.send(result)
+        });
+    },
 }
 
 module.exports = UserController

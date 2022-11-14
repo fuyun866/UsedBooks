@@ -1,7 +1,7 @@
 <template>
   <div class="books_detail">
     <div class="detail_head">
-      <img :src="'/node' + book_detail.bookA_image" alt="" />
+      <img :src="'node'+book_detail.bookA_image" alt="" />
       <div class="detail_buy">
         <div class="book_name">
           <p class="book_name_name">{{ book_detail.book_name }}</p>
@@ -12,8 +12,8 @@
         <div class="buyCar">
           <button class="join_btn" @click="handerPlOrder()">购买</button>
           <div class="love" @click="handerCollection">
-            <img v-if="!collection" src="@/assets/imgs/love_light.png" alt="">
-            <img v-else src="@/assets/imgs/love_dark.png" alt="">
+            <img v-if="!collection" src="@/assets/imgs/love_light.png" alt="" />
+            <img v-else src="@/assets/imgs/love_dark.png" alt="" />
           </div>
         </div>
       </div>
@@ -54,49 +54,115 @@
 </template>
 
 <script>
-import merge from "webpack-merge"
+import merge from "webpack-merge";
 export default {
-  name:"BookDetails",
+  name: "BookDetails",
   data() {
     return {
       book_detail: {},
-      collection:false
+      collectionValue: "",
+      collection: false,
+      isLogin:false
     };
+  },
+  computed: {
+    // 用户id
+    userId() {
+      return this.$store.state.userInfo.user_id;
+    },
+  },
+  watch: {
+    // 监听用户id
+    userId: {
+      handler(newValue, oldValue) {
+        // 获取到用户id后发送请求获取聊天数据
+        if (!this.isLogin) {
+          this.getCollecctionBook(this.$store.state.userInfo.user_id);
+        }
+      },
+    },
   },
   methods: {
     // 路由跳转
     handerPlOrder() {
-      if (!localStorage.getItem("token")) return this.$message.error("请登录...")
+      if (!localStorage.getItem("token"))
+        return this.$message.error("请登录...");
       this.$router.push({
         path: "/Order",
         query: {
-          book_detail:JSON.stringify(this.book_detail),
+          book_detail: JSON.stringify(this.book_detail),
         },
       });
     },
+
     // 收藏/取消收藏
-    async handerCollection(){
+    async handerCollection() {
+      if (!this.collection) {
+        if (this.collectionValue == null) {
+          this.collectionValue = `${this.book_detail.bookA_id} `;
+        } else {
+          this.collectionValue = this.collectionValue.concat(
+            `${this.book_detail.bookA_id} `
+          );
+        }
+      } else {
+        let collectArr = this.collectionValue.split(" ");
+        if (collectArr.length > 1) {
+          collectArr.pop();
+        }
+        let index = collectArr.indexOf(this.book_detail.bookA_id);
+        if (index > -1) {
+          collectArr.splice(index, 1);
+        }
+        if (collectArr.length > 0) {
+          let valueC = collectArr.join(" ");
+          this.collectionValue = valueC.concat(" ");
+        } else {
+          this.collectionValue = null;
+        }
+      }
       this.collection = !this.collection;
-      let {data} = await this.$axios.post("/node/bookabout/collection",{
-        bookA_collection:Number(this.collection),
-        bookA_id:this.book_detail.bookA_id
-      })
+
+      console.log(this.collectionValue);
+      // console.log(this.book_detail);
+      let { data } = await this.$axios.post("node/user/collect", {
+        user_collection: this.collectionValue,
+        user_id: this.$store.state.userInfo.user_id,
+      });
       this.$router.push({
-        query:merge(this.$route.query,{'bookA_collection':this.collection})
-      })
-      if(data.code && this.collection) this.$message.success("收藏成功")
-      if(!data.code) this.$message.error("操作失败")
-    }
+        query: merge(this.$route.query, { bookA_collection: this.collection }),
+      });
+      if (data.code && this.collection) this.$message.success("收藏成功");
+      if (!data.code) this.$message.error("操作失败");
+    },
+    // 获取收藏书籍数据
+    async getCollecctionBook() {
+      // 获得用户收藏字段
+      let { data: res } = await this.$axios.get(
+        `node/user/getCollections/${this.$store.state.userInfo.user_id}`
+      );
+      this.collectionValue = res[0].user_collection;
+      if (this.collectionValue == null) {
+        this.collection = false;
+      } else {
+        let collectArr = this.collectionValue.split(" ");
+        if (collectArr.length > 1) {
+          collectArr.pop();
+        }
+        for (let i = 0; i < collectArr.length; i++) {
+          if (collectArr[i] === this.book_detail.bookA_id) {
+            this.collection = true;
+          }
+        }
+      }
+    },
   },
-  async mounted() {
-    this.$store.dispatch("changehomebol", false);
+  mounted() {
     this.book_detail = this.$route.query;
-    console.log( this.$route.query);
-    this.collection = this.book_detail.bookA_collection == 1?true:false;
-  },
-  beforeRouteLeave(from, to, next) {
-    this.$store.dispatch("changehomebol", true);
-    next();
+    console.log(this.book_detail);
+    if(!this.$store.state.userInfo.user_id) return;
+    this.getCollecctionBook(this.$store.state.userInfo.user_id);
+    this.isLogin = true;
   },
 };
 </script>

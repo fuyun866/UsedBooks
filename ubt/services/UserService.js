@@ -207,7 +207,74 @@ const UserService = {
             else
                 callback({ code: 1, value: "登陆成功", data: result[0] })
         })
-    }
+    },
+    changeCollect: ({ user_collection, user_id }, callback) => {
+        console.log(user_id + "====" + user_collection)
+
+        let sql_update = `UPDATE User set user_collection=? where user_id=?`;
+        let sql_updateParams = [user_collection, user_id];
+        let sql_look_id = `SELECT * FROM USER WHERE user_id= ?`
+        try {
+            conn.query(sql_look_id, user_id, (err1, result1) => {
+                if (err1) {
+                    throw err1
+                }
+                // console.log(result1);
+                if (!result1.length) callback({ code: 0, value: "该用户不存在！" })
+                else {
+                    conn.query(sql_update, sql_updateParams, (err2, results2) => {
+                        if (err2) {
+                            throw err2
+                        }
+                        console.log(results2, "update_collection");
+                        if (err2) callback({ code: 0, value: "更新失败！" })
+                        else callback({ code: 1, value: "更新成功" })
+                    })
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    getCollections: (user_id, callback) => {
+        console.log(user_id,555)
+
+        let sql_find = `select user_collection from User where user_id=?`;
+        try {
+            conn.query(sql_find, user_id, function (err, results, fields) {
+                if (err) {
+                    throw err
+                }
+                console.log(results, "getCollections");
+                //将查询出来的数据返回给回调函数
+                callback &&
+                    callback(
+                        results ? JSON.parse(JSON.stringify(results)) : null
+                    )
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    deleteCollectionAll: (user_id, callback) => {
+        console.log(user_id)
+
+        let sql_delete = `UPDATE User set user_collection=null where user_id=?`;
+        try {
+            conn.query(sql_delete, user_id, function (err, results, fields) {
+                if (err) {
+                    throw err
+                }
+                console.log(results, "deleteCollectionAll");
+                if (err) callback({ code: 0, value: "清空失败！" })
+                else callback({ code: 1, value: "清空成功" })
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    },
 }
 
 module.exports = UserService

@@ -21,5 +21,12 @@ router.post("/avater",  UserController.changeAvater)
 router.get("/", UserController.getUser)
 //获取验证码
 router.post("/getSvg", UserController.getSvg)
+// 添加取消收藏
+router.post("/collect", UserController.changeCollect)
+//查询收藏夹内容
+router.get("/getCollections/:id", UserController.getCollections)
+// 清空收藏夹
+router.get("/deleteCollectionAll/:id", UserController.deleteCollectionAll)
+
 
 module.exports = router;
